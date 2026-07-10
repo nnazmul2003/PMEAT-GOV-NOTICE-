@@ -1,0 +1,3 @@
+git add sent_notices.txt
+git commit -m "Add empty tracking file"
+git push
