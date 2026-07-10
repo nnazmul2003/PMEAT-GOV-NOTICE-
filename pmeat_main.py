@@ -1,10 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import urllib3
+
+# SSL সার্টিফিকেট ওয়ার্নিং মেসেজগুলো হাইড করার জন্য
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- কনফিগারেশন ---
 URL = "https://pmeat.gov.bd/site/view/notices"
-TELEGRAM_TOKEN = "8878360729:AAGyjB-XCR_rwu7Cn2yu8fEyokmj07mNtIA"  # ⚙️ আপনার দেওয়া নতুন বটের টোকেন সেট করা হয়েছে
+TELEGRAM_TOKEN = "8878360729:AAGyjB-XCR_rwu7Cn2yu8fEyokmj07mNtIA"  
 CHAT_ID = "6382850126"                             
 TRACK_FILE = "pmeat_notices.txt"                    
 
@@ -28,9 +32,12 @@ def check_recent_notice():
     print("🔄 PMEAT ওয়েবসাইটের নোটিশ চেক করা হচ্ছে...")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        response = requests.get(URL, headers=headers, timeout=15)
+        
+        # 💡 পরিবর্তন এখানে: verify=False যুক্ত করা হয়েছে
+        response = requests.get(URL, headers=headers, timeout=15, verify=False)
+        
         if response.status_code != 200:
-            print("❌ ওয়েবসাইটে প্রবেশ করা যাচ্ছে না।")
+            print(f"❌ ওয়েবসাইটে প্রবেশ করা যাচ্ছে না। স্ট্যাটাস কোড: {response.status_code}")
             return
             
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -40,7 +47,6 @@ def check_recent_notice():
             rows = table.find_all('tr')
             new_count = 0
             
-            # পুরানো থেকে নতুনের দিকে যাওয়ার জন্য reversed() ব্যবহার করা হয়েছে
             for row in reversed(rows):
                 columns = row.find_all('td')
                 
@@ -52,7 +58,6 @@ def check_recent_notice():
                     title = link_element.text.strip()
                     link = link_element['href']
                     
-                    # তারিখ স্ক্র্যাপ
                     published_date = columns[1].text.strip() if len(columns) > 1 else "পাওয়া যায়নি"
                     
                     if link.startswith('/'):
@@ -66,7 +71,6 @@ def check_recent_notice():
                     if link in sent_notices:
                         continue
                     
-                    # 🔔 নতুন বটের মেসেজ ফরম্যাট
                     message = (
                         f"🔔 *PMEAT নতুন নোটিশ প্রকাশিত হয়েছে!*\n\n"
                         f"📅 *প্রকাশের তারিখ:* {published_date}\n"
