@@ -1,3 +1,14 @@
 git add sent_notices.txt
 git commit -m "Add empty tracking file"
 git push
+https://www.nvaccess.org/files/nvda/releases/2020.4/nvda_2020.4.exe
+https://pmeat.gov.bd/pages/notices/২০২০-২১-হতে-২০২৩-২৪-অর্থবছর-পর্যন্ত-উপবৃত্তি-ও-টিউশন-ফি-র-2c0402-6922f466dbfbab28ce0e2a25
+https://pmeat.gov.bd/pages/notices/সমন্বিত-উপবৃত্তি-কর্মসূচি-র-hsp-mis-সফটওয়্যারে-otp-এর-মাধ্যমে-লগইন-করতে-না-b4cc81-6922f11cdbfbab28ce0d2d91
+https://pmeat.gov.bd/pages/notices/সমন্বিত-উপবৃত্তি-কর্মসূচির-আওতায়-২০২৫-শিক্ষাবর্ষের-৬ষ্ঠ-৯ম-বিশেষ-7f6cb5-6922f20ddbfbab28ce0d767c
+https://pmeat.gov.bd/pages/notices/সমন্বিত-উপবৃত্তি-কর্মসূচি-র-hsp-mis-এ-ভুল-তথ্য-প্রদানের-কারণে-ইউজার-20736b-6922f176dbfbab28ce0d47ba
+https://pmeat.gov.bd/pages/notices/সমন্বিত-উপবৃত্তি-কর্মসূচির-hsp-mis-সফটওয়্যার-ব্যবহার-সংক্রান্ত-f787bb-6922f2bfdbfbab28ce0da8d0
+https://pmeat.gov.bd/pages/notices/hsp-mis-সফটওয়্যারে-লগইন-করার-ক্ষেত্রে-প্রয়োজনীয়-নির্দেশনা-ca56ae-6922f5a6dbfbab28ce0e8bef
+https://pmeat.gov.bd/pages/notices/স্নাতক-পাস-ও-সমমান-পর্যায়ের-উপবৃত্তির-আবেদন-প্রতিষ্ঠান-প্রধান-ih-8fea22-6922e919dbfbab28ce0abf62
+https://pmeat.gov.bd/pages/notices/সমন্বিত-উপবৃত্তি-কর্মসূচির-উদ্যোগে-২০২৫-২৬-অর্থবছরে-উপজেলা-পর্যায়ে-এক-দিনের-প্রশিক্ষণ-কর্মসূচির-তারিখ-পরিবর্তন-প্রসঙ্গে-57qug6-6a3a9e7850a67beec213acb3
+https://pmeat.gov.bd/pages/notices/২০২৫-২৬-অর্থবছরের-উপবৃত্তি-ও-টিউশন-ফির-অর্থ-বিতরণ-সংক্রান্ত-hqxhju-6a3a9f7b57b46174930271c4
+https://pmeat.gov.bd/pages/notices/চিকিৎসা-অনুদান-এর-জুলাই-আগস্ট-২০২৬-প্রান্তের-অনলাইনে-আবেদন-সংক্রান্ত-বিজ্ঞপ্তি-byckj0-6a4b3e9327c1d5959813e557
