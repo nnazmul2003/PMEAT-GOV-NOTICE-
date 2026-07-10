@@ -8,9 +8,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- কনফিগারেশন ---
 URL = "https://pmeat.gov.bd/site/view/notices"
-TELEGRAM_TOKEN = "8878360729:AAGyjB-XCR_rwu7Cn2yu8fEyokmj07mNtIA"  # আপনার নতুন বটের টোকেন
+TELEGRAM_TOKEN = "8878360729:AAGyjB-XCR_rwu7Cn2yu8fEyokmj07mNtIA"  # আপনার বটের টোকেন
 CHAT_ID = "6382850126"                             # আপনার চ্যাট আইডি
-TRACK_FILE = "pmeat_notices_final.txt"              # 💡 ট্র্যাক ফাইলের নাম পরিবর্তন করা হয়েছে যেন আগের পুরানো ডাটা ভুলে নতুন করে মেসেজ পাঠায়
+TRACK_FILE = "pmeat_notices_fixed.txt"              # 💡 নতুন ট্র্যাকিং ফাইল নাম যেন টেস্ট রান সফল হয়
 
 # ফাইল চেক এবং রিড
 if os.path.exists(TRACK_FILE):
@@ -32,8 +32,6 @@ def check_recent_notice():
     print("🔄 PMEAT ওয়েবসাইটের নোটিশ চেক করা হচ্ছে...")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        
-        # verify=False দিয়ে সরকারি সাইটের SSL সার্টিফিকেট বাইপাস করা হয়েছে
         response = requests.get(URL, headers=headers, timeout=15, verify=False)
         
         if response.status_code != 200:
@@ -47,33 +45,26 @@ def check_recent_notice():
             rows = table.find_all('tr')
             new_count = 0
             
-            # reversed(rows) এর মাধ্যমে পুরানো থেকে নতুনের দিকে (নিচ থেকে উপরে) লুপ চলবে
+            # পুরানো থেকে নতুনের দিকে (নিচ থেকে উপরে) লুপ চলবে
             for row in reversed(rows):
                 columns = row.find_all('td')
                 
-                # যদি টেবিল ডেটা বা কলাম সংখ্যা কম হয়, তবে স্কিপ করবে
-                if len(columns) < 2:
+                # সরকারি সাইটের নোটিশ বোর্ডে সাধারণত ৩টি কলাম থাকে (ক্রমিক, শিরোনাম, তারিখ)
+                # তাই কমপক্ষে ৩টি কলাম না থাকলে তা স্কিপ করবে
+                if len(columns) < 3:
                     continue
                 
                 link_element = row.find('a', href=True)
                 if link_element:
-                    # 💡 টাইটেল এবং লিংক আলাদা করা
-                    title = link_element.text.strip()
                     link = link_element['href']
                     
-                    # 💡 কলাম থেকে তারিখ খুঁজে বের করার নিখুঁত লজিক
-                    published_date = "পাওয়া যায়নি"
-                    for col in columns:
-                        col_text = col.text.strip()
-                        # যদি কলামের লেখায় সন বা ড্যাশ থাকে এবং টেক্সট সাইজ ছোট হয় (তারিখের ফরম্যাট)
-                        if ("২০২" in col_text or "-" in col_text) and len(col_text) < 30 and col_text != title:
-                            published_date = col_text
-                            break
+                    # 💡 নিখুঁত কলাম ইনডেক্স লজিক:
+                    # ২য় কলামে (index 1) থাকে নোটিশের মূল শিরোনাম/বিষয়
+                    title = columns[1].text.strip()
                     
-                    # ব্যাকআপ অপশন: যদি লজিক কাজ না করে তবে সরাসরি ৩ নম্বর কলামের ডাটা নিবে
-                    if published_date == "পাওয়া যায়নি" and len(columns) >= 3:
-                        published_date = columns[2].text.strip()
-
+                    # ৩য় কলামে (index 2) থাকে প্রকাশের তারিখ
+                    published_date = columns[2].text.strip()
+                    
                     # সাইটের ডোমেইন লিংক ঠিক করা
                     if link.startswith('/'):
                         link = f"https://pmeat.gov.bd{link}"
@@ -88,7 +79,7 @@ def check_recent_notice():
                     if link in sent_notices:
                         continue
                     
-                    # 🔔 টেলিগ্রাম মেসেজ ফরম্যাট (শিরোনাম প্রথমে, সঠিক তারিখ পরে)
+                    # 🔔 টেলিগ্রাম মেসেজ ফরম্যাট
                     message = (
                         f"🔔 *PMEAT নতুন নোটিশ প্রকাশিত হয়েছে!*\n\n"
                         f"📌 *শিরোনাম:* {title}\n\n"
