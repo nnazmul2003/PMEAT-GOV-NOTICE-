@@ -1,43 +1,37 @@
-name: PMEAT Notice Scraper
+name: PMEAT Notice Telegram Alert
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # প্রতি ৫ মিনিট পর পর অটো রান করবে
-  workflow_dispatch: # ম্যানুয়ালি রান করার অপশন
+    - cron: '*/5 * * * *' # প্রতি ৫ মিনিট পর পর চলবে
+  workflow_dispatch:
 
 jobs:
-  scrape:
+  check-notice:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install requirements
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install requests beautifulsoup4
 
-    - name: Run Scraper
-      env:
-        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        CHAT_ID: ${{ secrets.CHAT_ID }}
-      run: python main.py
+    - name: Run PMEAT notice checker
+      run: python pmeat_main.py  # 👈 নতুন ফাইলের নাম
 
     - name: Commit and Push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        if [ -f sent_notices.txt ]; then
-          git add sent_notices.txt
-          # ৪MD৩ পারমিশন এরর ফিক্স করার জন্য টোকেন রিমোট ইউআরএল সেটআপ
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git commit -m "Update sent notices track file" && git push || echo "No changes to commit"
-        else
-          echo "sent_notices.txt not found."
-        fi
+        git add pmeat_notices.txt || true  # 👈 নতুন ট্র্যাকিং ফাইল
+        git commit -m "Update PMEAT notices list [skip ci]" || true
+        git push || true
