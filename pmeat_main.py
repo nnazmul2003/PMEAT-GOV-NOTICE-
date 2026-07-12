@@ -2,15 +2,25 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import urllib3
+import time
+from threading import Thread
+from flask import Flask
 
 # SSL সার্টিফিকেট ভেরিফিকেশন এরর এড়াতে ওয়ার্নিং মেসেজ বন্ধ করা হয়েছে
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Flask App তৈরি (Render-এর পোর্ট বাইন্ড করার জন্য)
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is running perfectly!"
 
 # --- কনফিগারেশন ---
 URL = "https://pmeat.gov.bd/site/view/notices"
 TELEGRAM_TOKEN = "8878360729:AAGyjB-XCR_rwu7Cn2yu8fEyokmj07mNtIA"  # আপনার বটের টোকেন
 CHAT_ID = "6382850126"                             # আপনার চ্যাট আইডি
-TRACK_FILE = "pmeat_notices_fixed.txt"              # 💡 নতুন ট্র্যাকিং ফাইল নাম যেন টেস্ট রান সফল হয়
+TRACK_FILE = "pmeat_notices_fixed.txt"
 
 # ফাইল চেক এবং রিড
 if os.path.exists(TRACK_FILE):
@@ -45,41 +55,28 @@ def check_recent_notice():
             rows = table.find_all('tr')
             new_count = 0
             
-            # পুরানো থেকে নতুনের দিকে (নিচ থেকে উপরে) লুপ চলবে
             for row in reversed(rows):
                 columns = row.find_all('td')
-                
-                # সরকারি সাইটের নোটিশ বোর্ডে সাধারণত ৩টি কলাম থাকে (ক্রমিক, শিরোনাম, তারিখ)
-                # তাই কমপক্ষে ৩টি কলাম না থাকলে তা স্কিপ করবে
                 if len(columns) < 3:
                     continue
                 
                 link_element = row.find('a', href=True)
                 if link_element:
                     link = link_element['href']
-                    
-                    # 💡 নিখুঁত কলাম ইনডেক্স লজিক:
-                    # ২য় কলামে (index 1) থাকে নোটিশের মূল শিরোনাম/বিষয়
                     title = columns[1].text.strip()
-                    
-                    # ৩য় কলামে (index 2) থাকে প্রকাশের তারিখ
                     published_date = columns[2].text.strip()
                     
-                    # সাইটের ডোমেইন লিংক ঠিক করা
                     if link.startswith('/'):
                         link = f"https://pmeat.gov.bd{link}"
                     elif not link.startswith('http'):
                         link = f"https://pmeat.gov.bd/site/view/notices/{link}"
                         
-                    # সার্কুলার বাদ দেওয়ার ফিল্টার
                     if "circular" in title.lower() or "সার্কুলার" in title:
                         continue
                         
-                    # অলরেডি পাঠানো নোটিশ হলে স্কিপ করবে
                     if link in sent_notices:
                         continue
                     
-                    # 🔔 টেলিগ্রাম মেসেজ ফরম্যাট
                     message = (
                         f"🔔 *PMEAT নতুন নোটিশ প্রকাশিত হয়েছে!*\n\n"
                         f"📌 *শিরোনাম:* {title}\n\n"
@@ -90,7 +87,6 @@ def check_recent_notice():
                     send_telegram_message(message)
                     print(f"✅ নতুন বটে পাঠানো হয়েছে: {title}")
                     
-                    # ট্র্যাকিং ফাইলে সেভ করা
                     with open(TRACK_FILE, "a", encoding="utf-8") as f:
                         f.write(link + "\n")
                     sent_notices.add(link)
@@ -104,5 +100,20 @@ def check_recent_notice():
     except Exception as e:
         print(f"❌ ত্রুটি: {e}")
 
+# লুপ ফাংশন যা প্রতি ৫ মিনিট (৩০০ সেকেন্ড) পর পর রান করবে
+def run_loop():
+    while True:
+        check_recent_notice()
+        time.sleep(300) 
+
+def run():
+    # ব্যাকগ্রাউন্ডে চেক করার লুপ চালু করা হলো
+    t = Thread(target=run_loop)
+    t.start()
+    
+    # Render-এর জন্য পোর্ট সেটআপ
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
 if __name__ == "__main__":
-    check_recent_notice()
+    run()
